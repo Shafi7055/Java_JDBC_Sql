@@ -1,36 +1,43 @@
 import java.sql.*;
+import java.util.Scanner;
 
 public class FetchStudents {
     public static void main(String[] args) {
         String url = "jdbc:mysql://localhost:3306/studentdb";
-        String user = "root"; // update if needed
+        String user = "root";
         String password = "shafi";
 
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter roll: ");
+        int roll = scanner.nextInt();
+        scanner.nextLine(); // clear newline
+
+        System.out.print("Enter name: ");
+        String name = scanner.nextLine();
+
         try {
-            // Optional: manually load driver (helps ensure it works)
             Class.forName("com.mysql.cj.jdbc.Driver");
 
             Connection conn = DriverManager.getConnection(url, user, password);
-            System.out.println("Connected to MySQL studentdb!\n");
+            System.out.println("\nConnected to MySQL studentdb!");
 
-            String query = "SELECT * FROM students";
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
+            String query = "INSERT INTO students (roll, name) VALUES (?, ?)";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setInt(1, roll);
+            pstmt.setString(2, name);
 
-            System.out.println("ID\tRoll\tName");
-            System.out.println("--------------------------");
+            int rowsInserted = pstmt.executeUpdate(); 
 
-            while (rs.next()) {
-                int id = rs.getInt("id");
-                int roll = rs.getInt("roll");
-                String name = rs.getString("name");
-
-                System.out.println(id + "\t" + roll + "\t" + name);
+            if (rowsInserted > 0) {
+                System.out.println("Student inserted successfully!");
             }
 
             conn.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        scanner.close();
     }
 }
